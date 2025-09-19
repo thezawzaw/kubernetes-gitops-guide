@@ -2278,15 +2278,65 @@ server:
   ## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/tls/#tls-certificates-used-by-argocd-server
   certificateSecret:
     # -- Create argocd-server-tls secret
-    enabled: false
+    enabled: true
     # -- Annotations to be added to argocd-server-tls secret
     annotations: {}
     # -- Labels to be added to argocd-server-tls secret
     labels: {}
     # -- Private Key of the certificate
-    key: ''
     # -- Certificate data
-    crt: ''
+    crt: |-
+      -----BEGIN CERTIFICATE-----
+      MIIDbjCCAlagAwIBAgIUDQ4RRZTFWVuMib8Va9HUA42kRx8wDQYJKoZIhvcNAQEL
+      BQAwNDEhMB8GA1UEAwwYYXJnb2NkLWFpcm5hdi1kZXYub3BzLmlvMQ8wDQYDVQQK
+      DAZBaXJOYXYwHhcNMjUwOTE5MDE1NTM0WhcNMjYwOTE5MDE1NTM0WjA0MSEwHwYD
+      VQQDDBhhcmdvY2QtYWlybmF2LWRldi5vcHMuaW8xDzANBgNVBAoMBkFpck5hdjCC
+      ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKOuC9BMRB2VrQKvIbHuZmuM
+      OOw9FDEb2pnrqhJp1gX7O+YvQ/ogEDXgTh1JEp56I+3DpQo/URP6bAMmxunnNgkE
+      fhib8tKi2tyArZKX1mQgx4P5wvupjON9wHIdnFKSTjNorSe7XG1Y2lIXRkSLyj0Q
+      NPAsbRz1EQ+l3GHX7Bhlu7LP+oD3x+bE7rGJCoHkGZoRJeSogF2hLDeEsjURgYSf
+      +y9y7hbwvyEqm8llykD5Ci4uN0k7bvZeQhZqEw0iTXd7+dGfAsQ6lI26ZuzQiC3R
+      EWJeMfVcaN0lZLuTGN7JI0OZeHeshWhgWPTRaw413b7ncH9y7Bz3nNH5ssKs4qEC
+      AwEAAaN4MHYwHQYDVR0OBBYEFG+7cOYQRSDsh7+vro7178wk61ljMB8GA1UdIwQY
+      MBaAFG+7cOYQRSDsh7+vro7178wk61ljMA8GA1UdEwEB/wQFMAMBAf8wIwYDVR0R
+      BBwwGoIYYXJnb2NkLWFpcm5hdi1kZXYub3BzLmlvMA0GCSqGSIb3DQEBCwUAA4IB
+      AQAyhD3VqQJST6CRaiG79O5xidNZQvmD8EHLd27U0h3gDNaMCh03bhy/mIvTOycI
+      WT6uncRonI46EWRLMdof9ODYf4bHJabKEItuagyg5ys/7agooqLhBCfpoOPtNCQL
+      4fGaB6qnYLTlWyPGgeVkkbC275D3Ct15O+tNi5I05KJsaznLarfkSxgx1hH/ZWyv
+      yuF3NaXDY0d34abf2lGFVId0wHbphZp0m0GZWTPu5LbxPnOI8f08ijpJMuFx8sV1
+      BuTDDnUCZON7Vo9L79PBw/H4jJzSXFvM4ejPCBrvXVQGbiEL4bbU+noRThGbEilW
+      j83RWyJW+UgRZRBVhaVrgrah
+      -----END CERTIFICATE-----
+
+    key: |-
+      -----BEGIN PRIVATE KEY-----
+      MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCjrgvQTEQdla0C
+      ryGx7mZrjDjsPRQxG9qZ66oSadYF+zvmL0P6IBA14E4dSRKeeiPtw6UKP1ET+mwD
+      Jsbp5zYJBH4Ym/LSotrcgK2Sl9ZkIMeD+cL7qYzjfcByHZxSkk4zaK0nu1xtWNpS
+      F0ZEi8o9EDTwLG0c9REPpdxh1+wYZbuyz/qA98fmxO6xiQqB5BmaESXkqIBdoSw3
+      hLI1EYGEn/svcu4W8L8hKpvJZcpA+QouLjdJO272XkIWahMNIk13e/nRnwLEOpSN
+      umbs0Igt0RFiXjH1XGjdJWS7kxjeySNDmXh3rIVoYFj00WsONd2+53B/cuwc95zR
+      +bLCrOKhAgMBAAECggEACWeHIz02jrKaYbSZTYVimhxQ6vXpcpbknQJm3674Dpjs
+      TKH7mGP+OnI8Wr9nk/Z1mQQsN+YCbRDu4tF4DVltB+CbtCNFtOeJhrDYCDu0JEWj
+      4QfZNad8wldn1savxCjG2HpTtJw1x8yaoqvWrDqR8Kc9O216CXdlNw5zFqYW2SHr
+      rJ7i+ue4b8tHrCXR3wj/h/eBuPequRLoRSJD5HGclb9j9zA4RCFFeRFH5sFTtRwq
+      M5ER+pws19hclaGNm6sb9YAwCHvJDzreJXKAElh15A1qkUpyrbjG4XF8yGdIxDeX
+      LgYFSde66RbWXU6TCa93G29i7LvtgcJpbs8yHvdq7wKBgQDcJ49rxZydYj36imPW
+      f75siOVTaLYE/9gAaeVsbLDpaxmmLAhg8/jq4x2BtQ22AJJ0UKUShn0pWoRUWsqa
+      18p0IlWX9vi80f9yUM0kTGukmAiVlU7bwnJosmHHvmVW92YMtH8qsVAuTy3Ohjh2
+      UiUANyD/imk/BuMay57zsYZHMwKBgQC+VIUDIzDJq87ig/ry41MWAVyoMud0jSm4
+      qqzVfX2n8y630zxbr+8NSxZQ6E7NNfk+SLsKvnMd8BJT2Q0l7j/XYzaGyuxUW66D
+      ib2Z3NTG/wm93naTNFhENKo9PRSov8LaWZWbzDTKEw/WVATtgq+O1/+pI541Wcyi
+      TY+KvbIe2wKBgQCOIgBHPPqC5XVMNmKEjk6bdbpQok65ZY/HnJag7H8/A4U4sj7q
+      kTiINP7Myd5DPZVQAOzBzBAsTaMXbtJVK7IqTixigvFNvmokHKSEpc3tIraQFCgo
+      Wx5QF7JnKbX1cp3w3+sl3fn9G+Nf7WmwghIfVHg6YtrV9RVULFe/z0H43wKBgBb3
+      U+WBBY4QMTKcAlf0nj31hBy3p74kmngyABDyx4rQiT6dOpdFr27HNLYmkfupG54s
+      YIV3XaSrJ0r+0dtV2FZBHn89VS8IsRImOL6sKvCoLaC/i0dP9aalRDWHfUqveO+o
+      B6l5BpWrnymZkc6nClAOOEdMiPafE1YyTbPMGAYpAoGBAL93tZhOTIWeVE7ZHrI2
+      L2yFOXSSSaspXkqTXeEva084078deH41GA/qnthBn/hvpWoxtUX+N3Lo+zrIKb8Y
+      gjzqIYrsl6fvmy1YVRAqkPxDJGBUyJsNIPNVNSqvZutP/1ZWJXOzfHGnfMoGfK5r
+      ZbhXo+7a8vuY/qdbgunDBpqP
+      -----END PRIVATE KEY-----
 
   ## Server service configuration
   service:
@@ -2408,7 +2458,7 @@ server:
 
     # -- Argo CD server hostname
     # @default -- `""` (defaults to global.domain)
-    hostname: ""
+    hostname: argocd-airnav-dev.ops.io
 
     # -- The path to Argo CD server
     path: /
@@ -2419,13 +2469,13 @@ server:
     # -- Enable TLS configuration for the hostname defined at `server.ingress.hostname`
     ## TLS certificate will be retrieved from a TLS secret `argocd-server-tls`
     ## You can create this secret via `certificate` or `certificateSecret` option
-    tls: false
+    tls: true
 
     # -- The list of additional hostnames to be covered by ingress record
     # @default -- `[]` (See [values.yaml])
-    extraHosts:
-      - name: argocd-airnav-dev.ops.io
-        path: /
+    extraHosts: []
+    #  - name: argocd-airnav-dev.ops.io
+    #    path: /
 
     # -- Additional ingress paths
     # @default -- `[]` (See [values.yaml])
@@ -2455,10 +2505,10 @@ server:
 
     # -- Additional TLS configuration
     # @default -- `[]` (See [values.yaml])
-    extraTls:
-      - hosts:
-          - argocd-airnav-dev.ops.io
-        secretName: tls-secret-argocd-airnav-ops-io
+    extraTls: []
+    #  - hosts:
+    #      - argocd-airnav-dev.ops.io
+    #    secretName: tls-secret-argocd-airnav-ops-io
 
     # AWS specific options for Application Load Balancer
     # Applies only when `serv.ingress.controller` is set to `aws`

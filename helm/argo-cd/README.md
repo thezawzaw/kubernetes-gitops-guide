@@ -4,7 +4,6 @@
 
  - **Helm Repository**: [https://argoproj.github.io/argo-helm](https://argoproj.github.io/argo-helm)
  - **ArtifactHub**: [https://artifacthub.io/packages/helm/argo/argo-cd](https://artifacthub.io/packages/helm/argo/argo-cd)
- - **Documentation**: [https://artifacthub.io/packages/helm/argo/argo-cd#installing-the-chart](https://artifacthub.io/packages/helm/argo/argo-cd#installing-the-chart)
  - **Current Deployed App Version**: 3.1.5
  - **Current Deployed Chart Version**: 8.5.0
 
@@ -24,7 +23,7 @@ $ ./helm_upgrade.sh
 ```
 
 
-## Helm Upgrade Status
+## Latest Helm Upgrade Status
 
 ```sh
 NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
