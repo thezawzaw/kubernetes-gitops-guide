@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: selfsigned-cert-airnav-ops-io
+spec:
+  secretName: tls-secret-selfsigned-airnav-ops-io
+  dnsNames:
+  - "*.ops.io"
+  - "*.airnav.ops.io"
+  subject:
+    organizations:
+    - "AirNav"
+    - "Ops"
+  issuerRef:
+    name: selfsigned-clusterissuer
+    kind: ClusterIssuer
+
