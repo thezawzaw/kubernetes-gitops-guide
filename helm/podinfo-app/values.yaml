@@ -1,5 +1,5 @@
 #
-# Default values for the Podinfo app.
+# Default values for the Podinfo application.
 #
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
@@ -9,7 +9,7 @@ replicaCount: 1
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: registry.gitlab.com/zawzaw.me/podinfo-app
+  repository: harbor-dev-repo.ops.io/library/zawzaw.me/podinfo-app
   # This sets the pull policy for images.
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
@@ -17,7 +17,7 @@ image:
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets:
-  - name: secret-registry-docker
+  - name: secret-registry-harbor
 # This is to override the chart name.
 nameOverride: ""
 fullnameOverride: ""
