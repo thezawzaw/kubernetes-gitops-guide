@@ -9,19 +9,12 @@
 
 ## Install and Upgrade
 
-Add the Ingress NGINX Helm repository:
-
-```sh
-$ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-```
-
-Install and upgrade the Ingress NGINX Helm chart by running the script:
+Install and upgrade the Ingress NGINX Helm chart:
 
 ```sh
 $ cd helm/ingress-nginx
 $ ./helm_upgrade.sh
 ```
-
 
 ## Latest Helm Upgrade Status
 

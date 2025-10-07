@@ -9,19 +9,12 @@
 
 ## Install and Upgrade
 
-Add the ArgoCD Helm repository:
-
-```sh
-$ helm repo add argo https://argoproj.github.io/argo-helm
-```
-
-Install and upgrade the ArgoCD Helm chart by running the script:
+Install and upgrade the ArgoCD Helm chart:
 
 ```sh
 $ cd helm/argo-cd
 $ ./helm_upgrade.sh
 ```
-
 
 ## Latest Helm Upgrade Status
 

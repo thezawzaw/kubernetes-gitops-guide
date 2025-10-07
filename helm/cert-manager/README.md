@@ -9,13 +9,7 @@
 
 ## Install and Upgrade
 
-Add the Cert-Manager Helm repository:
-
-```sh
-$ helm repo add cert-manager https://charts.jetstack.io
-```
-
-Install and upgrade the Cert-Manager Helm chart by running the script:
+Install and upgrade the Cert-Manager Helm chart:
 
 ```sh
 $ cd helm/cert-manager
