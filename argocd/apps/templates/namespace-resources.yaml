@@ -21,6 +21,29 @@ spec:
       - PrunePropagationPolicy=background
       - CreateNamespace=true
 ---
+{{- $targetNamespace := "cert-manager" -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: namespace-resources-{{ $targetNamespace }}
+spec:
+  destination:
+    name: ''
+    namespace: "{{ $targetNamespace }}"
+    server: "{{ .Values.spec.destination.server }}"
+  source:
+    path: "kustomize/namespace-resources/overlays/{{ $targetNamespace }}"
+    repoURL: "{{ .Values.spec.source.repoURL }}"
+    targetRevision: "{{ .Values.spec.source.targetRevision }}"
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - PrunePropagationPolicy=background
+      - CreateNamespace=true
+---
 {{- $targetNamespace := "dev" -}}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -67,7 +90,7 @@ spec:
       - PrunePropagationPolicy=background
       - CreateNamespace=true
 ---
-{{- $targetNamespace := "cert-manager" -}}
+{{- $targetNamespace := "kube-system" -}}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -89,4 +112,3 @@ spec:
     syncOptions:
       - PrunePropagationPolicy=background
       - CreateNamespace=true
-
