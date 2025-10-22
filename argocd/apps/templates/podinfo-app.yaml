@@ -14,7 +14,7 @@ metadata:
     # Set the image tag Helm parameter that's defined in your Helm chart values file.
     argocd-image-updater.argoproj.io/myapp.helm.image-tag: image.tag
     # Set the write-back method. It can be 'argocd' or 'git'.
-    argocd-image-updater.argoproj.io/write-back-method: argocd
+    argocd-image-updater.argoproj.io/write-back-method: git:repocreds
 spec:
   destination:
     namespace: dev
