@@ -4,5 +4,5 @@ helm:
     value: harbor-dev-repo.ops.io/podinfo-sample-app
     forcestring: true
   - name: image.tag
-    value: develop@sha256:1b16ec637e070a362e6b0fdbf64b91421b86355661868b4145d1196d67d46cdc
+    value: develop@sha256:4b19d3078abf287481e1b3398e97ec5abbb39f2fa149d22eeaffe3001009008e
     forcestring: true
