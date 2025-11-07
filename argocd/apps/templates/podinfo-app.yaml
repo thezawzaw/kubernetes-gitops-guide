@@ -8,7 +8,7 @@ metadata:
   annotations:
     # Set the image tag that you want to update.
     # (e.g., develop, latest)
-    argocd-image-updater.argoproj.io/image-list: myapp=harbor-dev-repo.ops.io/library/podinfo-sample-app:develop
+    argocd-image-updater.argoproj.io/image-list: myapp=harbor-dev-repo.ops.io/library/podinfo-sample:develop
     # Set the image update strategy for alias "myapp."
     argocd-image-updater.argoproj.io/myapp.update-strategy: digest
     # Set the image tag Helm parameter that's defined in your Helm chart values file.
