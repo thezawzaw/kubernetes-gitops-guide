@@ -21,6 +21,14 @@ What you'll learn in this hands-on practical guide:
 
 This GitOps hands-on practical guide is based on the [GitOps in Kubernetes with GitLab CI and ArgoCD](https://levelup.gitconnected.com/gitops-in-kubernetes-with-gitlab-ci-and-argocd-9e20b5d3b55b) article by Poom Wettayakorn. But, I will share more details and focus on a beginner-friently guide.
 
+## Prerequisites
+
+Make sure you have installed the following:
+
+- Familiar with basic Linux commands
+- Docker Engine
+- Linux installed VM or server or local machine (Ubuntu, Fedora, RHEL, etc.)
+
 ## [1] Containerizing an application
 
 > [!NOTE]
@@ -327,4 +335,96 @@ trivy-scan-tag:
 **_Explanation:_**
 
 [Buildah](https://github.com/containers/buildah) builds the Docker container image of the Podinfo application with Dockerfile and pushes the target container image to internal Harbor container registry server when you push changes into the podinfo-sample Git repository.
+
+---
+
+## [3] Creating a Kubernetes Cluster with K3s
+
+> [!NOTE]
+> If you already have a Kubernetes cluster on your local machine or server, you can skip this step.
+
+In this section, you will learn how to set up a Kubernetes cluster with K3s. I will use K3s in this guide, but you can also use any other Kubernetes distribution.
+
+[K3s](https://k3s.io/) is a small, minimal, and lightweight Kubernetes distribution, developed and maintained by Rancher. K3s is easy to install, half the memory, all in a single binary of less than 100MB that reduces the dependencies and steps needed to install, run and auto-update a production Kubernetes cluster.
+
+The K3s Official Documentation: [https://docs.k3s.io/](https://docs.k3s.io/)
+
+### Set up a K3s Kubernetes Cluster
+
+To set up a K3s Kubernetes cluster, run the following script:
+
+```sh
+#!/usr/bin/env bash
+
+#
+# A Shell Script
+# to setup and bootstrap the K3s server, also known as Kubernetes control-plane/master node
+#
+# This script is for setup the single-node K3s Kubernetes cluster.
+#
+
+curl -sfL https://get.k3s.io | sh -s - server --write-kubeconfig-mode 644
+```
+
+This installation script is for bootstrapping and creating the single-node K3s Kubernetes cluster with proper permissions to the default kubeconfig file.
+
+You can also learn how to install on the K8s quickstart guide: [https://docs.k3s.io/quick-start](https://docs.k3s.io/quick-start)
+
+### Install Freelens Kubernetes IDE
+
+In this guide, I will use Freelens, a Kubernetes IDE, to manage the K3s Kubernetes cluster.
+
+Freelens is a free and open-source Kubernetes IDE that provides a graphical user interface (UI) for managing and monitoring Kubernetes clusters. Freelens is currently maintained by the community.
+
+The Official Website: [https://freelensapp.github.io/](https://freelensapp.github.io/)
+
+Download the Freelens package with curl, for example, RPM-based Linux systems,
+
+```sh
+curl -LO https://github.com/freelensapp/freelens/releases/download/v1.7.0/Freelens-1.7.0-linux-amd64.rpm
+```
+
+Install the Freelens, for example, RPM-based Linux systems,
+
+```sh
+sudo dnf install ./Freelens-1.7.0-linux-amd64.rpm
+```
+
+For more option on installing the Freelens package, please see on GitHub: [https://github.com/freelensapp/freelens/blob/main/README.md#downloads](https://github.com/freelensapp/freelens/blob/main/README.md#downloads)
+
+---
+
+## [4] Building a Kubernetes Helm Chart
+
+Before you write a Kubernetes Helm chart for the Podinfo sample application, make sure you understand Kubernetes core components and resource types. For example, Kubernetes cluster architecture, nodes, services, pods, deployments, ingress, and so on.
+
+Firstly, you must learn to understand Kubernetes basics. If you are a beginner, I would like to recommend the following useful links to learn Kubernetes:
+
+- Learn Kubernetes Basics: [https://kubernetes.io/docs/tutorials/kubernetes-basics](https://kubernetes.io/docs/tutorials/kubernetes-basics/)
+- Kubernetes Core Concepts and Components: [https://kubernetes.io/docs/concepts/](https://kubernetes.io/docs/concepts/)
+
+### Introduction to Helm
+
+**Helm** is a Kubernetes package manager CLI tool that manages and deploys Helm charts.
+
+**Helm Charts** are collection and packages of pre-configured application ressources which can be deployed as one unit. Helm charts help you define, install, upgrade and deploy applications easily on Kubernetes cluster.
+
+ - The Offical Website: [https://helm.sh/](https://helm.sh/)
+ - Helm Charts: [https://artifacthub.io/](https://artifacthub.io/)
+
+### Installation and Setup
+
+To install the Helm command-line tool with script, run the following command:
+
+```sh
+$ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4
+```
+
+```sh
+$ chmod 700 get_helm.sh && ./get_helm.sh
+```
+
+(OR)
+
+You can install the Helm command-line tool with any other package managers. Please, see on the Helm documentation: [https://helm.sh/docs/intro/install#through-package-managers](https://helm.sh/docs/intro/install#through-package-managers).
 
