@@ -1,8 +1,7 @@
-# GitOps CI/CD in Kubernetes
-
+# GitOps in Kubernetes with GitLab CI + Argo CD
 ## A Hands-on Practical Guide to Building a Fully Automated CI/CD Pipeline Using GitLab CI and GitOps Argo CD on Kubernetes
 
-**PDF Format:** [The PDF version of the GitOps CI/CD in Kubernetes Guide is available here](./pdfs/k8s-gitops-cicd-guide.pdf).
+**PDF Format:** [The PDF version is available here](./pdfs/k8s-gitops-cicd-guide.pdf).
 
 ![gitops-featured-image](./images/img_k8s_gitops_cicd_drawio.png)
 
@@ -12,7 +11,21 @@ This hands-on practical guide is to demonstrate GitOps CI/CD automation in Kuber
 
 ## Summary: Objectives
 
-What you'll learn in this practical guide:
+### Tech Stack and Tools
+
+ - **Docker:** For containerizing the application.
+
+ - **GitLab CI:** For Continuous Integration (CI) tool.
+
+ - **Harbor Container Registry:** For storing the container images.
+
+ - **Kubernetes:** A container orchestration system for managing the containerized applications.
+
+ - **Argo CD:** A GitOps Continuous Delivery (CD) tool for automating app deployments on Kubernetes.
+
+ - **Argo CD Image Updater:** For automatically updating the container image of Argo CD-managed applications.
+
+### What You'll Learn in this Guide
 
 - **Step (1): Containerizing an application**  
   _In this section, you'll learn how to write a [Dockerfile](https://docs.docker.com/reference/dockerfile/) to containerize a sample Python application._
@@ -54,20 +67,16 @@ GitOps delivers:
 
 ## [1] Containerizing an application
 
-> [!NOTE]
-> 
-> **Before You Begin**
->
-> Make sure you are familiar with Docker before you begin.
->
-> - Install Docker: https://www.docker.com/get-started
-> - Dockerfile Reference: https://docs.docker.com/reference/dockerfile
->
-> If you are not familiar with Docker, please learn it first with the following _Docker for Beginners_ tutorial.
->
-> Docker for Beginners: https://docker-curriculum.com/
+Before you begin, make sure you are familiar with Docker.
 
-### Introduction to a sample Python application
+ - Install Docker: https://www.docker.com/get-started
+ - Dockerfile Reference: https://docs.docker.com/reference/dockerfile
+
+ If you are not familiar with Docker, please learn it first with the following _Docker for Beginners_ tutorial.
+
+ - Docker for Beginners: https://docker-curriculum.com/
+
+### Introduction to a sample app
 
 In this guide, I will use the [podinfo-sample](https://gitlab.com/thezawzaw/podinfo-sample) Python application to demonstrate building a fully automated GitOps CI/CD pipeline in Kubernetes. 
 
@@ -96,9 +105,11 @@ For example, replace `gitops-example` with your username.
 $ git clone git@gitlab.com:gitops-example/podinfo-sample.git
 ```
 
-### Writing a Dockerfile
+### Writing a Dockerfile to containerize the Podinfo app
 
 Firstly, you will need to write Dockerfile to containerize this Python web application. In the [podinfo-sample](https://gitlab.com/thezawzaw/podinfo-sample) Git repository, I've already written a Dockerfile to containerize the app.
+
+Dockerfile Reference: [https://gitlab.com/thezawzaw/podinfo-sample/-/blob/main/Dockerfile](https://gitlab.com/thezawzaw/podinfo-sample/-/blob/main/Dockerfile)
 
 ```Dockerfile
 #
@@ -184,7 +195,7 @@ URL: [http://localhost:5005](http://localhost:5005)
 
 ---
 
-## [2] Building GitLab CI Pipelines
+## [2] Building a GitLab CI Pipeline
 
 ### Introduction to GitLab CI
 
@@ -197,7 +208,7 @@ Before you begin, make sure you have learned the basics of GitLab CI and YAML sy
  - Get started with GitLab CI: https://docs.gitlab.com/ci/
  - CI/CD YAML Syntax Reference: https://docs.gitlab.com/ci/yaml/
 
-### Installing and Registering a GitLab Runner
+### Installing and Registering a GitLab Runner (Optional)
 
 > [!NOTE]
 >
@@ -300,7 +311,13 @@ shutdown_timeout = 0
     volumes = ["/cache"]
 ```
 
-### Configuring GitLab CI Pipeline to Build and Push Container Images
+### Configuring a GitLab CI Pipeline to Build and Push Container Images
+
+> [!NOTE]
+> 
+> In this guide, I will use the private **Harbor Container Registry** for storing and hosting the Docker container image of the Podinfo application.
+>
+> For container registry, you can use any other public container registry server. For example, Docker Hub or GHCR or Quay.io.
 
 In this section, I will use Buildah to build and push Docker container images automatically to the Harbor Docker registry.
 
@@ -308,9 +325,33 @@ In this section, I will use Buildah to build and push Docker container images au
 
 **Building Container Images with Buildah in GitLab CI:** https://github.com/thezawzaw/platform-wiki/wiki/Building-Container-Images-with-Buildah-in-GitLab-CI
 
-Before you configure GitLab CI pipeline, make sure you add two GitLab CI variables `REGISTRY_HOST` `DOCKER_CFG` on the Podinfo repository:
+Before you configure a GitLab CI pipeline, make sure you add two GitLab CI variables `REGISTRY_HOST` `DOCKER_CFG` on the Podinfo Git repository. You also need to get your container registry credentials.
 
-Go to your Podinfo Git repository >> <kbd>Project Settings</kbd> >> <kbd>CI/CD</kbd> >> <kbd>Variables</kbd>, and add the following key/value GitLab CI variables.
+To get your container registry credentials with the following steps:
+
+- Log in to the container registry server with username and password.
+
+   *For Example,*
+   
+   ```sh
+   $ expose REGISTRY_PASSWORD=examplePasswd
+   $ docker login --username zawzaw --password ${REGISTRY_PASSWORD} harbor-repo-example.io
+   ```
+
+- Then, your container registry credentials are stored in the `~/.docker/config.json` file.
+
+   ```sh
+   [zawzaw@fedora-linux:~]$ cat ~/.docker/config.json 
+   {
+           "auths": {
+                   "harbor-repo-example.io": {
+                           "auth": "emF3emF3Okhhcm..."
+                   }
+           }
+   }
+   ```
+
+Then, go to your Podinfo Git repository >> <kbd>Project Settings</kbd> >> <kbd>CI/CD</kbd> >> <kbd>Variables</kbd>, and add the following key/value GitLab CI variables.
 
 > [!NOTE]
 >
@@ -324,11 +365,11 @@ Go to your Podinfo Git repository >> <kbd>Project Settings</kbd> >> <kbd>CI/CD</
 | Key | Value |
 | --- | --- |
 | `REGISTRY_HOST` | `harbor-repo-example.io` |
-| `DOCKER_CFG` | `{"auths": {"harbor-repo-example.io": {"auth": "emF3emF3OkhhcmJvckV4YW1wbGVQYXNzd29yZAo="}}}` |
+| `DOCKER_CFG` | `{"auths": {"harbor-repo-example.io": {"auth": "emF3emF3Okhhcm..."}}}` |
 
- - `REGISTRY_HOST`: for your Container registry host.
+`REGISTRY_HOST`: for your Container registry host.
 
- - `DOCKER_CFG`: for the credentials to access your Container registry server. You can find your Docker login credentials in the `~/.docker/config.json` file of the host machine.
+`DOCKER_CFG`: for the credentials to access your Container registry server. You can find your Docker login credentials in the `~/.docker/config.json` file of the host machine.
 
 I've already created `.gitlab-ci.yml` GitLab CI configuration on the Podinfo Git repository. But, you can write your own `.gitlab-ci.yml` configuration under your Podinfo sample project's root directory.
 
@@ -535,20 +576,24 @@ Please, see the detailed documentation on how to install Kubernetes Dashboard: [
 
 ## [4] Writing a Kubernetes Helm Chart from Scratch
 
-> Before you write a Kubernetes Helm chart for the Podinfo sample application, make sure you understand **Kubernetes core components**, **Kubernete objects** and **workloads resources** first. If you are not familiar with Kubernetes, you can start with the [Kubernetes Basics](https://kubernetes.io/docs/tutorials/kubernetes-basics) tutorial.
-> 
-> Useful tutorials and guides to learn Kubernetes:
+Before you write a Kubernetes Helm chart for the Podinfo sample application, make sure you understand **Kubernetes core components**, **Kubernete objects** and **workloads resources** first. If you are not familiar with Kubernetes, you can start with the [Kubernetes Basics](https://kubernetes.io/docs/tutorials/kubernetes-basics) tutorial.
+
+Useful tutorials and guides to learn Kubernetes:
+
+- Learn Kubernetes Basics: [https://kubernetes.io/docs/tutorials/kubernetes-basics](https://kubernetes.io/docs/tutorials/kubernetes-basics/)
+- Kubernetes Core Concepts and Components: [https://kubernetes.io/docs/concepts/](https://kubernetes.io/docs/concepts/)
+
+> [!NOTE]
 >
->  - Learn Kubernetes Basics: [https://kubernetes.io/docs/tutorials/kubernetes-basics](https://kubernetes.io/docs/tutorials/kubernetes-basics/)
->  - Kubernetes Core Concepts and Components: [https://kubernetes.io/docs/concepts/](https://kubernetes.io/docs/concepts/)
+> If you have experience in writing and building the Helm Chart, you can skip this section.
 
 In this section, I will write a Kubernetes Helm chart from scratch for the Podinfo Python application. I had published an article, and you can also learn about how to write a Kubernetes Helm chart from scratch with this article.
 
- - **Writing a Kubernetes Helm Chart from Scratch:** [https://www.zawzaw.blog/k8s-write-k8s-helm-chart/](https://www.zawzaw.blog/k8s-write-k8s-helm-chart/)
+**Writing a Kubernetes Helm Chart from Scratch:** [https://www.zawzaw.blog/k8s-write-k8s-helm-chart/](https://www.zawzaw.blog/k8s-write-k8s-helm-chart/)
 
 For reference, I've already written a Helm chart for the Podinfo Python application. Please, see the **Podinfo Helm Chart** on the following GitOps repository.
 
- - **Podinfo Helm Chart:** [https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/tree/main/helm/podinfo-app](https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/tree/main/helm/podinfo-app)
+**Podinfo Helm Chart:** [https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/tree/main/helm/podinfo-app](https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/tree/main/helm/podinfo-app)
 
 ### Introduction to Helm
 
@@ -681,7 +726,7 @@ For the Podinfo Helm Chart, we need to configure the following steps.
 
 #### Set Docker container image
 
-_**Values ▸ {HELM_CHART_ROOT}/values.yaml**_
+_**Values Path ▸ {HELM_CHART_ROOT}/values.yaml**_
 
 In the `values.yaml` file, define variables for the Docker container image that we've built and pushed to your container registry.
 
@@ -694,7 +739,7 @@ image:
 
 </br>
 
-_**Deployment Template ▸ {HELM_CHART_ROOT}/templates/deployment.yaml**_
+_**Deployment Template Path ▸ {HELM_CHART_ROOT}/templates/deployment.yaml**_
 
 In the `templates/deployment.yaml` file, we can set variables from values.yaml with `.Values.image.repository`, `.Values.image.pullPolicay` and `.Values.image.tag`. It's YAML-based Helm template language syntax. You can learn on [The Chart Template Developer's Guide](https://helm.sh/docs/chart_template_guide).
 
@@ -713,9 +758,84 @@ containers:
 
 ---
 
+#### Set Docker Image Pull Secret
+##### Optional: For Only Private Container Registry
+
+> [!NOTE]
+>
+> This is only needed when you are using the private container registry server. If you are using the Docker container image on the public container registry (e.g., Docker Hub), you don't need to set the image pull secret.
+>
+> Reference: [https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
+
+Log in to the container registry server with username and password.
+
+*For Example,*
+
+```sh
+$ expose REGISTRY_PASSWORD=examplePasswd
+$ docker login --username zawzaw --password ${REGISTRY_PASSWORD} harbor-repo-example.io
+```
+
+Then, your container registry credentials are stored in the `~/.docker/config.json` file.
+
+```sh
+[zawzaw@fedora-linux:~]$ cat ~/.docker/config.json 
+{
+        "auths": {
+                "harbor-repo-example.io": {
+                        "auth": "emF3em..."
+                }
+        }
+}
+```
+
+Then, create a Docker image pull secret with the `kubectl` command-line tool.
+
+> [!NOTE]
+>
+> If you deploy the Podinfo Helm Chart in the `dev` namespace, your Docker image pull secret must be in the same namespace.
+
+```sh
+$ kubectl create secret generic secret-registry-harbor \
+ --from-file=.dockerconfigjson=/home/zawzaw/.docker/config.json \
+ --type=kubernetes.io/dockerconfigjson \
+ --namespace dev
+```
+
+Then, you can see now your Docker image pull secret by running the `kubectl get secrets` command.
+```sh
+$ kubectl get secrets secret-registry-harbor --namespace dev -o yaml
+```
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-registry-harbor
+  namespace: dev
+  ...
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: ewoJImF1dGhzIjogewoJCSJoYXJib3ItZGV2LXJlcG8ub3BzLmlvIjogewoJCQkiYXV0aCI6ICJlbUYzZW1GM09pUmhaa3R5UFRwbGNFZ3pXallw...
+```
+
+</br>
+
+_**Values Path ▸ {HELM_CHART_ROOT}/values.yaml**_
+
+Then, set the Docker image pull secret you created in the above step in the `values.yaml` file.
+
+```yaml
+# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets:
+  - name: secret-registry-harbor
+...
+```
+
+---
+
 #### Set Service Port and Target Port
 
-_**Values ▸ {HELM_CHART_ROOT}/values.yaml**_
+_**Values Path ▸ {HELM_CHART_ROOT}/values.yaml**_
 
 In the `values.yaml` file, define variables for sevice type, port and targetPort.
 
@@ -728,7 +848,7 @@ In the `values.yaml` file, define variables for sevice type, port and targetPort
 
 </br>
 
-_**Service Template ▸ {HELM_CHART_ROOT}/templates/service.yaml**_
+_**Service Template Path ▸ {HELM_CHART_ROOT}/templates/service.yaml**_
 
 In `templates/service.yaml` file, we can set service varibales from values.yaml file like this:
   
@@ -750,7 +870,7 @@ spec:
 
 #### Set Target Docker Container Port
 
-_**Values ▸ {HELM_CHART_ROOT}/values.yaml**_
+_**Values Path ▸ {HELM_CHART_ROOT}/values.yaml**_
 
 In the `values.yaml` file, define a variable for the Container port number that the Podinfo app is serving and listening to.
 
@@ -761,7 +881,7 @@ deployment:
 
 </br>
 
-_**Deployment Template ▸ {HELM_CHART_ROOT}/templates/deployment.yaml**_
+_**Deployment Template Path ▸ {HELM_CHART_ROOT}/templates/deployment.yaml**_
 
 In the `templates/deployment.yaml` file, set target Docker container port variable from values.yaml file:
 
@@ -780,7 +900,7 @@ containers:
 
 #### Set Environment Varibales
 
-_**Values ▸ {HELM_CHART_ROOT}/values.yaml**_
+_**Values Path ▸ {HELM_CHART_ROOT}/values.yaml**_
 
 In the `values.yaml` file, define environment variables that the Podinfo application retrieves the data in UI.
 
@@ -807,7 +927,7 @@ deployment:
 
 </br>
 
-_**Deployment Template ▸ {HELM_CHART_ROOT}/templates/deployment.yaml**_
+_**Deployment Template Path ▸ {HELM_CHART_ROOT}/templates/deployment.yaml**_
 
 In `templates/deployment.yaml`, set environment variables dynamically from the values.yaml file. When you need to pass the array and whole config block into Helm templates, you can use `- with` and `- toYaml`.
 
@@ -1189,4 +1309,171 @@ Then, you can access the Argo CD UI with the URL format `http://<node_ip_address
 *For Example,* the Argo CD UI URL is http://192.168.10.20:30080
 
 ![screenshot-argocd-login-ui](./images/img_screenshot_argocd_login_ui.png)
+
+### Understanding the GitOps Repository Structure and Argo CD App Configuration
+
+Before you deploy the apps with Argo CD, we need to understand how the GitOps repository is organized and structured. In this guide, I will use the following GitOps repository as a sample repository to demonstrate GitOps Argo CD on Kubernetes.
+
+Sample GitOps Repository: [https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev](https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev)
+
+```sh
+.
+├── argocd
+│   └── apps
+│       ├── Chart.yaml
+│       ├── templates
+│       │   ├── guestbook.yaml
+│       │   ├── namespace-resources.yaml
+│       │   └── podinfo-app.yaml
+│       └── values.yaml
+├── helm
+│   ├── guestbook
+│   └── podinfo-app
+├── kustomize
+│   └── namespace-resources
+└── README.md
+```
+
+ - `argocd/apps`: Argo CD applications.
+
+ - `helm`: Kubernetes Helm charts for various apps. *For example,* the Podinfo Python sample app. You've written this Helm chart in the previous step.
+
+ - `kustomize/namespace-resources`: Required namespace resources. *For example,* Docker image pull secrets are used by various Kubernetes Helm Charts.
+
+ Reference: [https://github.com/argoproj/argocd-example-apps](https://github.com/argoproj/argocd-example-apps)
+
+**An Argo CD application** is a Custom Resource Definition (CRD) that provides declarative configuration to deploy the apps from the Git repository or Helm repository.
+
+*For Example,*
+
+In the above GitOps repository, I've configured an Argo CD app `argocd/apps/templates/podinfo-app.yaml` like the following configuration that links and deploys the Podinfo Helm chart from this Git repository. The Podinfo Helm Chart is located in `helm/podinfo-app` on the GitOps repository.
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: podinfo-app-dev
+  labels:
+    app: podinfo-app
+    env: dev
+spec:
+  destination:
+    namespace: dev
+    server: {{ .Values.spec.destination.server }}
+  source:
+    path: helm/podinfo-app
+    repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+```
+
+ - `metadata.name`: Argo CD application name. (e.g., podinfo-app-dev)
+
+ - `metadata.labels`: Labels for your Argo CD application. (Optional)
+
+ - `spec.destination.namespace`: Destination namespace to deploy the app. (e.g., `dev`) In the above example, Argo CD will deploy the Podinfo app in the `dev` namespace.
+
+ - `spec.destination.server`: Destination server. By default, `https://kubernetes.default.svc`.
+ - `spec.source.path`: Source YAML manifests (or) Kustomize (or) Helm Chart's path from your GitOps repository to deploy them on Kubernetes.
+
+ - `spec.source.repoURL`: Source GitOps URL. (e.g., `git@gitlab.com:thezawzaw/k8s-gitops-sample.git`)
+ - `spec.source.targetRevision`: Source GitOps repository's target revision, also known as Git branch name. (e.g., `main`)
+
+The `spec.destination.server`, `spec.source.repoURL`, `spec.source.targetRevision` (Git branch name) are defined in the `argocd/apps/values.yaml` file.
+
+```yaml
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: git@gitlab.com:thezawzaw/k8s-gitops-sample.git
+    targetRevision: main
+```
+
+That means Argo CD deploys the Podinfo Helm chart `helm/podinfo-app` using the Git repository. Make sure you have your GitOps repository's `repoURL`, `targetRevision` (branch name), and `path`.
+
+You will learn how to create Argo CD applications to deploy the Helm Chars or plain YAML manifests.
+
+### Deploying the Podinfo Helm Chart with Argo CD
+
+We've written the Helm Chart for the containerized Podinfo Python application. Please, remember the **Step [4] Writing a Kubernetes Helm Chart from Scratch** section. In this section, I will deploy this Podinfo Helm Chart with Argo CD.
+
+Firstly, you need to log in to the Argo CD UI. Remember your *Argo CD admin password* you've created in the previous **Accessing the Argo CD UI** section. Then, you need to add the Git repository to Argo CD. Later, you can use this Git repository for creating Argo CD applications in the UI dashboard.
+
+Before you add the Git repository in the Argo CD UI, you need to fork the following sample GitOps repository under your personal account.
+
+Sample GitOps Repository: [https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev](https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev)
+
+And then, make sure you change the GitOps `repoURL` in the `argocd/apps/values.yaml` file. *(Replace with your actual GitLab username.)*
+
+```yaml
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: git@gitlab.com:<gitlab-username>/<k8s-gitops-repo-name>.git
+    targetRevision: main
+```
+
+To add the Git repository in the Argo CD UI,
+
+Go to <kbd>Settings</kbd> ⟶  <kbd>Repositories</kbd> ⟶  <kbd>+ CONNECT REPO</kbd>, and then configure the following and click <kbd>CONNECT</kbd>
+
+> [!NOTE]
+>
+> For the public Git repositories, you can also use an HTTPS connection without a username and password. But in this guide, I will use the SSH connection method instead.
+>
+
+ - `Name`: Set your repository name. (Optional)
+
+ - `Project`: Just select `default`.
+
+ - `Repository URL`: Set your SSH URL of the Git repository.
+
+ - `SSH private key data`: Set your SSH private key data.
+
+![screenshot-argocd-connect-repo](./images/img_screenshot_argocd_connect_git_repo.png)
+
+After connect to your GitOps repository, you can now create an Argo CD application to deploy your plan Kubernetes manifests or Helm Charts from the GitOps repository.
+
+To create an Argo CD application, click the <kbd>+ NEW APP</kbd> button and then set the following.
+
+ - **Application Name:** Set your Argo CD app name.
+
+ - **Project Name**: Select default.
+
+ - **SYNC POLICY:** Select *Automatic* and checked *ENABLE AUTO-SYNC*, *PRUNE RESOURCES*, and *SELF-HEAL*.
+
+ - **SYNC Option:** Enable *AUTO-CREATE NAMESPACE*
+
+ - **Repository URL:** Your GitOps repository URL. (e.g., `git@gitlab.com:<gitlab-username>/<k8s-gitops-example.git>`)
+
+ - **Revision:** Your GitOps repository's branch name. (e.g., `main` or `dev` or `staging`)
+
+ - **Path:** Your parent or root Argo CD app's path. When you create a root app `argocd/apps`, Argo CD automatically deploys the apps defined under `argocd/apps/templates`.
+
+   Remember this GitOps repository structure:
+   
+   ```sh
+   argocd/apps                                 
+    ├── Chart.yaml                     
+    ├── templates             
+    │   ├── namespace-resources.yaml                
+    │   └── podinfo-app.yaml          
+    └── values.yaml
+   ```
+
+ - **Cluster URL:** By default, it's `https://kubernetes.default.svc`.
+
+ - **Namespace**: By default, Argo CD use the `argocd` namespace for deploying the *Argo CD* applications.
+
+![screenshot-argocd-create-app](./images/img_screenshot_argocd_create_app.png)
+
+![screenshot-argocd-create-app-page2](./images/img_screenshot_argocd_create_app_2.png)
 
