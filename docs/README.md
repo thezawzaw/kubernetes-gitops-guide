@@ -1,13 +1,12 @@
-# GitOps in Kubernetes with GitLab CI + Argo CD
-## A Hands-on Practical Guide to Building a Fully Automated CI/CD Pipeline Using GitLab CI and GitOps Argo CD on Kubernetes
+# GitOps in Kubernetes Guide
 
-**PDF Format:** [The PDF version is available here](./pdfs/k8s-gitops-cicd-guide.pdf).
+## A Hands-on Practical Guide to Building a Fully Automated CI/CD Pipeline Using GitLab CI, GitOps Argo CD, and Argo CD Image Updater on Kubernetes
 
 ![gitops-featured-image](./images/img_k8s_gitops_cicd_drawio.png)
 
 ## Introduction
 
-This hands-on practical guide is to demonstrate GitOps CI/CD automation in Kubernetes with GitLab CI and Argo CD using the [podinfo-sample](https://gitlab.com/thezawzaw/podinfo-sample) Python application. It mainly focuses on building end-to-end CI/CD pipeline — how to containerize an application, configure Continuous Integration (CI), Continuous Deployment (CD) and fully automate application deployment on Kubernetes.
+This hands-on practical guide is to demonstrate GitOps in Kubernetes with GitLab CI, Argo CD, and Argo CD Image Updater using the [podinfo-sample](https://gitlab.com/thezawzaw/podinfo-sample) Python application. It mainly focuses on building an end-to-end fully automated CI/CD pipeline—how to containerize an application, configure Continuous Integration (CI) and Continuous Deployment (CD), and fully automate application deployment on Kubernetes.
 
 ## Summary: Objectives
 
@@ -593,7 +592,7 @@ In this section, I will write a Kubernetes Helm chart from scratch for the Podin
 
 For reference, I've already written a Helm chart for the Podinfo Python application. Please, see the **Podinfo Helm Chart** on the following GitOps repository.
 
-**Podinfo Helm Chart:** [https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/tree/main/helm/podinfo-app](https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/tree/main/helm/podinfo-app)
+**Podinfo Helm Chart:** [https://github.com/thezawzaw/kubernetes-gitops-guide/-/tree/main/helm/podinfo-app](https://github.com/thezawzaw/kubernetes-gitops-guide/-/tree/main/helm/podinfo-app)
 
 ### Introduction to Helm
 
@@ -1118,7 +1117,8 @@ $ helm install podinfo-app-dev ./ \
 >
 > In this guide, I will focus on a simple NodePort service configuration to access the Podinfo application from the outside of the cluster for testing purposes only.
 >
->  - If you want to use Ingress to access the Podinfo application with the domain name, you can enable it in the `.values.yaml` file [https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/blob/main/helm/podinfo-app/values.yaml](https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/blob/main/helm/podinfo-app/values.yaml#L63).
+>  - If you want to use Ingress to access the Podinfo application with the domain name, you can enable it in the `.values.yaml` file [https://github.com/thezawzaw/kubernetes-gitops-guide/-/blob/main/helm/podinfo-app/values.yaml](https://github.com/thezawzaw/kubernetes-gitops-guide/-/blob/main/helm/podinfo-app/values.yaml#L63).
+>
 >  - For setting up the Ingress for more information can be found here: [https://kubernetes.io/docs/concepts/services-networking/ingress/](https://kubernetes.io/docs/concepts/services-networking/ingress/); Or you can use the Gateway API [https://gateway-api.sigs.k8s.io/](https://gateway-api.sigs.k8s.io/) to access the Podinfo app from the outside of the Kubernetes cluster.
 >
 
@@ -1327,9 +1327,9 @@ Then, you can access the Argo CD UI with the URL format `http://<node_ip_address
 >
 > In this guide, I will use only the user-friendly Argo CD Web UI to create the Argo CD applications.
 
-Make sure you understand how our GitOps repository is organized and structured. In this guide, I will use the following GitOps repository as a sample Git repository to demonstrate GitOps Argo CD on Kubernetes.
+Make sure you understand how our GitOps repository is organized and structured. In this guide, I've created GitOps configurations and I will use the following GitOps repository as a sample Git repository to demonstrate GitOps Argo CD on Kubernetes. You need to fork this GitOps repository under your GitHub account.
 
-Sample GitOps Repository: [https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev](https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev)
+Sample GitOps Repository: [https://github.com/thezawzaw/kubernetes-gitops-guide](https://github.com/thezawzaw/kubernetes-gitops-guide)
 
 GitOps Repository Structure:
 
@@ -1409,7 +1409,7 @@ spec:
  - `spec.destination.server`: Destination server. By default, `https://kubernetes.default.svc`.
  - `spec.source.path`: Source YAML manifests (or) Kustomize (or) Helm Chart's path from your GitOps repository to deploy them on Kubernetes.
 
- - `spec.source.repoURL`: Source GitOps URL. (e.g., `git@gitlab.com:thezawzaw/k8s-gitops-sample.git`)
+ - `spec.source.repoURL`: Source GitOps URL. (e.g., `git@github.com:thezawzaw/kubernetes-gitops-guide.git`)
  - `spec.source.targetRevision`: Source GitOps repository's target revision, also known as Git branch name. (e.g., `main`)
 
 The `spec.destination.server`, `spec.source.repoURL`, `spec.source.targetRevision` (Git branch name) are defined in the `argocd/apps/values.yaml` file.
@@ -1419,7 +1419,7 @@ spec:
   destination:
     server: https://kubernetes.default.svc
   source:
-    repoURL: git@gitlab.com:thezawzaw/k8s-gitops-sample.git
+    repoURL: git@github.com:thezawzaw/kubernetes-gitops-guide.git
     targetRevision: main
 ```
 
@@ -1435,7 +1435,7 @@ Firstly, you need to log in to the Argo CD UI. Remember your *Argo CD admin pass
 
 Before you add the Git repository in the Argo CD UI, you need to fork the following sample GitOps repository under your personal account.
 
-Sample GitOps Repository: [https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev](https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev)
+Sample GitOps Repository: [https://github.com/thezawzaw/kubernetes-gitops-guide](https://github.com/thezawzaw/kubernetes-gitops-guide)
 
 And then, make sure you change the GitOps `repoURL` in the `argocd/apps/values.yaml` file. *(Replace with your actual GitLab username.)*
 
@@ -1444,7 +1444,7 @@ spec:
   destination:
     server: https://kubernetes.default.svc
   source:
-    repoURL: git@gitlab.com:<gitlab-username>/<k8s-gitops-repo-name>.git
+    repoURL: git@github.com:<github-username>/<k8s-gitops-repo-name>.git
     targetRevision: main
 ```
 
@@ -1479,7 +1479,7 @@ To create an Argo CD application, click the <kbd>+ NEW APP</kbd> button and then
 
  - **SYNC Option:** Enable *AUTO-CREATE NAMESPACE*
 
- - **Repository URL:** Your GitOps repository URL. (e.g., `git@gitlab.com:<gitlab-username>/<k8s-gitops-example.git>`)
+ - **Repository URL:** Your GitOps repository URL. (e.g., `git@github.com:<github-username>/<k8s-gitops-example.git>`)
 
  - **Revision:** Your GitOps repository's branch name. (e.g., `main` or `dev` or `staging`)
 
@@ -1557,7 +1557,7 @@ The Argo CD Image Updater is a tool that is automatically checking and updating 
 
 Documentation: [https://argocd-image-updater.readthedocs.io/en/stable/](https://argocd-image-updater.readthedocs.io/en/stable/)
 
-### Example Usecase
+### Example Use Case
 
  - In this guide, we have the [Podinfo](https://gitlab.com/thezawzaw/podinfo-sample) app, and when a developer pushes the changes into the Podinfo Git repository, GitLab CI builds and pushes the container image to the Harbor container registry.
  - Then, we need to restart the Podinfo Kubernetes pod manually. That's why we need to use Argo CD Image Updater to check and update automatically the container image of the Podinfo application.
@@ -1597,7 +1597,7 @@ Please, see more details on conainer registries: [https://argocd-image-updater.r
 
 Before you configure Argo CD Image Update in your Argo CD application, make sure you configure the secrets for your container registry.
 
-You will need to configure the container image pull secret and install first in the `argocd` namespace. But, for this guide, I've already a created an image pull secret on the GitOps repository under `kustomize/namespace-resources/` [https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev/-/blob/main/kustomize/namespace-resources/base/secret-registry-harbor.yaml](https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev/-/blob/main/kustomize/namespace-resources/base/secret-registry-harbor.yaml) and you just need to update your credentials for your container registry.
+You will need to configure the container image pull secret and install first in the `argocd` namespace. But, for this guide, I've already a created an image pull secret on the GitOps repository under `kustomize/namespace-resources/` [https://github.com/thezawzaw/kubernetes-gitops-guide/-/blob/main/kustomize/namespace-resources/base/secret-registry-harbor.yaml](https://github.com/thezawzaw/kubernetes-gitops-guide/-/blob/main/kustomize/namespace-resources/base/secret-registry-harbor.yaml) and you just need to update your credentials for your container registry.
 
 ```
 apiVersion: v1
@@ -1677,7 +1677,7 @@ metadata:
  - `argocd-image-updater.argoproj.io/write-back-method`: Set the write-back method. It can be 'argocd' or 'git'. I've already mentioned about that and please see in the above section.
    > To access the GitOps repository, you've already add the SSH private key when adding the Git repository to the Argo CD UI's repository settings in the previous **Argo CD** section. By default, the Argo CD Image Updater re-uses these credentials. So, you just need to set `git:repocreds` to authenticate to the Git repository. If you want to configure specific Git credentials, please see [https://argocd-image-updater.readthedocs.io/en/stable/basics/update-methods/#specifying-git-credentials](https://argocd-image-updater.readthedocs.io/en/stable/basics/update-methods/#specifying-git-credentials).
 
-Reference: [gitlab.com/thezawzaw/k8s-gitops-airnav-dev/-/blob/main/helm/podinfo-app/.argocd-source-podinfo-app-dev.yaml](gitlab.com/thezawzaw/k8s-gitops-airnav-dev/-/blob/main/helm/podinfo-app/.argocd-source-podinfo-app-dev.yaml)
+Reference: [https://github.com/thezawzaw/kubernetes-gitops-guide/-/blob/main/helm/podinfo-app/.argocd-source-podinfo-app-dev.yaml](https://github.com/thezawzaw/kubernetes-gitops-guide/-/blob/main/helm/podinfo-app/.argocd-source-podinfo-app-dev.yaml)
 
 ## Demo: Testing a Fully Automated CI/CD Pipeline
 
@@ -1706,4 +1706,8 @@ index 57589af..2de8134 100755
 Then, wait for 2 to 3 minutes after GitLab CI jobs have passed. Then, you will see version change in the Podinfo application.
 
 ![screenshot-podinfo-k8s-demo](./images/img_screenshot_podinfo_k8s_demo.jpeg)
+
+## Credit and Thanks
+
+Credit and thanks to [@poom.wettayakorn](https://medium.com/@poom.wettayakorn) for the [Podinfo](https://gitlab.com/gitops-argocd-demo/webapp) Python application to demonstrate GitOps in Kubernetes using GitLab CI, Argo CD, and Argo CD Image Updater.
 

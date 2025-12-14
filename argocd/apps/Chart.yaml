@@ -1,6 +1,6 @@
 apiVersion: v2
 name: apps
-description: ArgoCD applications
+description: Arog CD root application
 
 # A chart can be either an 'application' or a 'library' chart.
 #
