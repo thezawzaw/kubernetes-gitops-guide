@@ -43,7 +43,7 @@ This hands-on practical guide is to demonstrate GitOps CI/CD automation in Kuber
   _In this section, you'll learn how to set up and configure [Argo CD](https://argo-cd.readthedocs.io/en/stable/) as GitOps CD to deploy applications automatically on Kubernetes._
 
 - **Setup (6): Configuring Argo CD Image Updater**  
-  _In this section, you'll learn how to set up and configure [Argo CD Image Updater](https://argocd-image-updater.readthedocs.io/en/stable/) to automate updating and pulling the Docker container images automatically on Kubernetes._
+  _In this section, you'll learn how to set up and configure [Argo CD Image Updater](https://argocd-image-updater.readthedocs.io/en/stable/) to automate updating the Docker container images automatically on Kubernetes._
 
 This hands-on practical guide on GitOps in Kubernetes is based on Poom Wettayakorn's [webapp](https://gitlab.com/gitops-argocd-demo/webapp), but I will share more details and focus on a beginner-friendly guide.
 
@@ -1349,7 +1349,13 @@ GitOps Repository Structure:
 └── README.md
 ```
 
-  - `argocd/apps`: A composed app (App of Apps pattern) to deploy the apps at once. *In this example,* when you create an Argo CD app (root app) via the UI, Argo CD automatically creates the apps (child apps) under `argocd/apps/templates/` on the Git repository.
+  - `argocd/apps`: A composed app (App of Apps pattern) to deploy the multiple apps at once. *In this example,* when you create an Argo CD app (root app) via the UI, Argo CD automatically creates the apps (child apps) at once under `argocd/apps/templates/` on the Git repository.
+    
+    > We can create the Argo CD applications from the Git repository in two ways:
+    >
+    >  - **Creating a single Argo CD application via the UI:** In this approach, if you have multiple apps, you will need to create each app separately via the UI. (Please, see examples: [https://argo-cd.readthedocs.io/en/stable/getting_started/#6-create-an-application-from-a-git-repository](https://argo-cd.readthedocs.io/en/stable/getting_started/#6-create-an-application-from-a-git-repository)
+    >
+    >  - **Creating multiple Argo CD applications at once via the UI using **Composed app (App of Apps pattern)**:** In this approach, you only need to create a root Argo CD app (Or parent app) via the UI. Then, Argo CD automatically creates the apps (child apps) at once under `argocd/apps/templates/` on the Git repository. In this guide, I will use this approach.
 
   - `helm`: Kubernetes Helm charts to deploy your web apps and tools. *In this example,* the Podinfo Helm Chart. You've written this Helm Chart in the previous section.
 
@@ -1359,7 +1365,7 @@ GitOps Repository Structure:
     >
     > If you are not familiar with Kustomize, you can learn how to use Kustomize with the following guides.
     >
-    >  - Installation: [https://kustomize.io/](https://kustomize.io/) (The `kubectl` CLI tool supports Kustomize by default. You can check with `kubectl kustomize`.)
+    >  - Installation: [https://kustomize.io/](https://kustomize.io/) (The `kubectl` CLI tool now supports Kustomize by default. You can check with `kubectl kustomize`.)
     >  - Usage: [https://github.com/kubernetes-sigs/kustomize/blob/master/README.md#usage](https://github.com/kubernetes-sigs/kustomize/blob/master/README.md#usage)
     >  - Declarative Management of Kubernetes Objects Using Kustomize: [https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/)
 
@@ -1498,6 +1504,25 @@ To create an Argo CD application, click the <kbd>+ NEW APP</kbd> button and then
 
 ![screenshot-argocd-create-app-page2](./images/img_screenshot_argocd_create_app_2.png)
 
+Then, Argo CD deploys the following multiple Argo CD apps at once under the `argocd/apps/templates` directory. You can also check on the Argo CD Web UI.
+
+ - **Podinfo** (links to `helm/podinfo-app` and deploys the Helm Chart to your Kubernetes cluster.)
+
+ - **Namespace Resources** (links to `kustomize/namespace-resources` and deploys namespace resources (e.g., Docker image pull secrets) to relevant namespaces defined in `kustomize/namespace-resources/overlays` to your Kubernetes cluster.
+
+```sh
+.
+├── argocd
+│   └── apps
+│       ├── templates
+│       │   ├── namespace-resources.yaml
+│       │   └── podinfo-app.yaml
+├── helm
+│   └── podinfo-app
+├── kustomize
+│   └── namespace-resources
+```
+
 Then, you can check your Argo CD apps via the UI or check with the comman-line tool.
 
 ```sh
@@ -1517,10 +1542,168 @@ $ kubectl get service podinfo-app-dev --namespace dev
 
 ```sh
 NAME                  TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
-podinfo-app-dev       NodePort   10.43.175.76   <none>        80:30352/TCP   63d
+podinfo-app-dRev       NodePort   10.43.175.76   <none>        80:30352/TCP   63d
 ```
 
 Then, you can now access the Podinfo Python application via [http://192.168.x.x:30352](http://192.168.x.x:30352). *(Replace with your actual Node IP address and NodePort number.)*.
 
 ![screenshot-podinfo-demo](./images/img_screenshot_podinfo_k8s_demo.jpeg)
+
+## [6] Installing and Configuring Argo CD Image Updater
+
+In this section, you will learn how to install and set up the Argo CD Updater on Kubernetes for updating the container images of the applications deployed and managed by Argo CD.
+
+The Argo CD Image Updater is a tool that is automatically checking and updating new versions of the container images of the applications that are deployed and managed by Argo CD. You need to use the Argo CD Image Updater for updating the container images automatically.
+
+Documentation: [https://argocd-image-updater.readthedocs.io/en/stable/](https://argocd-image-updater.readthedocs.io/en/stable/)
+
+### Example Usecase
+
+ - In this guide, we have the [Podinfo](https://gitlab.com/thezawzaw/podinfo-sample) app, and when a developer pushes the changes into the Podinfo Git repository, GitLab CI builds and pushes the container image to the Harbor container registry.
+ - Then, we need to restart the Podinfo Kubernetes pod manually. That's why we need to use Argo CD Image Updater to check and update automatically the container image of the Podinfo application.
+
+### Installation
+
+In this guide, I will use the official Helm Chart of the Argo CD Image Updater to install it.
+
+Argo CD Image Updater Helm Chart: [https://artifacthub.io/packages/helm/argo/argocd-image-updater](https://artifacthub.io/packages/helm/argo/argocd-image-updater)
+
+Add the Helm repository:
+
+```sh
+$ helm repo add argo https://argoproj.github.io/argo-helm
+```
+
+Install the Helm Chart:
+```sh
+helm install argocd-image-updater argo/argocd-image-updater --namespace argocd
+```
+
+### Configuring Argo CD Image Updater for an Argo CD Application
+
+The Argo CD Image Updater now supports the most of the container registries.
+
+ - Docker Hub (docker.io)
+ - Docker Registry v2 reference implementation (on-premise)
+ - Red Hat Quay (quay.io and on-premise)
+ - JFrog Artifactory (jfrog.io and on-premise)
+ - GitHub Container Registry (ghcr.io)
+ - GitHub Packages Registry (docker.pkg.github.com)
+ - GitLab Container Registry (registry.gitlab.com)
+ - Google Container Registry (gcr.io)
+ - Azure Container Registry (azurecr.io)
+
+Please, see more details on conainer registries: [https://argocd-image-updater.readthedocs.io/en/stable/configuration/registries/](https://argocd-image-updater.readthedocs.io/en/stable/configuration/registries/).
+
+Before you configure Argo CD Image Update in your Argo CD application, make sure you configure the secrets for your container registry.
+
+You will need to configure the container image pull secret and install first in the `argocd` namespace. But, for this guide, I've already a created an image pull secret on the GitOps repository under `kustomize/namespace-resources/` [https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev/-/blob/main/kustomize/namespace-resources/base/secret-registry-harbor.yaml](https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev/-/blob/main/kustomize/namespace-resources/base/secret-registry-harbor.yaml) and you just need to update your credentials for your container registry.
+
+```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-registry-harbor
+  namespace: argocd
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: ewoJImF1dGhzIjogewoJCSJoYXJib3ItZGV2LXJlcG8ub3BzLm...
+```
+
+Then, configure the container registry in the `values.yaml` file of the Argo CD Image Updater. *(Make sure you configure your credentials if you are using the private container registry.)*
+
+ - Download the original `values.yaml` file: https://github.com/argoproj/argo-helm/blob/main/charts/argocd-image-updater/values.yaml
+
+ - Then, configure the container registry credentials in the `values.yaml` in the `registries` section. For example, for Harbor conainer registry. *(Replace with your actual image pull secret name in `credentials: pullsecret:<namespace>/<image-pull-secret-name>`).*
+
+   ```yaml
+   # -- Argo CD Image Updater registries list configuration. More information [here](https://argocd-image-updater.readthedocs.io/en/stable/configuration/registries/).
+   registries:
+     - name: harbor-registry
+       prefix: harbor-dev-repo.ops.io
+       api_url: https://harbor-dev-repo.ops.io
+       credentials: pullsecret:argocd/secret-registry-harbor # Make sure you replace with your actual credentials.
+       defaultns: library
+       insecure: true
+   ```
+
+ - Then, upgrade the Argo CD Image Updater Helm Chart.
+
+   ```sh
+   $ helm upgrade argocd-image-updater argo/argocd-image-updater --values ./values.yaml --namespace argocd
+   ```
+
+The Argo CD Image Updater now supports two write-back methods:
+
+ - `argocd`: The `argocd` write-back method directly modifies the Argo CD application using Kubernetes API.
+
+ - `git`: The `git` write-back method creates a Git commit in the GitOps repository that stores the information about the container image to update to. By default, the Argo CD Image Updater will store a file named `.argocd-source-<appName>.yaml` in the path used by the Argo CD application. For example, `helm/podinfo-app/.argocd-source-podinfo-app-dev.yaml`. Then, Argo CD will pick up parameters in this file, when rendering manifests for the Argo CD application.
+
+In this guide, I will use the `git` write-back method to follow the GitOps approach, instead of modifiying the Argo CD application directly.
+
+Usage is simple, you just need to use Annotations in your Argo CD application. For example, `argocd/apps/templates/podinfo-app.yaml`.
+
+```sh
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: podinfo-app-dev
+  labels:
+    app: podinfo-app
+    env: dev
+  annotations:
+    # Set the image tag that you want to update.
+    # (e.g., develop, latest)
+    argocd-image-updater.argoproj.io/image-list: myapp=harbor-dev-repo.ops.io/library/podinfo-sample:develop
+
+    # Set the image update strategy for alias "myapp."
+    argocd-image-updater.argoproj.io/myapp.update-strategy: digest
+
+    # Set the image tag Helm parameter that's defined in your Helm chart values file.
+    argocd-image-updater.argoproj.io/myapp.helm.image-tag: image.tag
+
+    # Set the write-back method. It can be 'argocd' or 'git'.
+    argocd-image-updater.argoproj.io/write-back-method: git:repocreds
+...
+```
+
+ - `argocd-image-updater.argoproj.io/image-list`: Set the image tag that you want to update. For example, `develop`, `latest`.
+
+ - `argocd-image-updater.argoproj.io/myapp.update-strategy`: Set the image update strategy for alias "myapp." The Argo CD Image Updater now supported `semver`, `latest/newest-build`, `digest`, and `name/alphabetical`.
+   > In this guide, I've used `digest` image update strategy because I used same image tag `develop` for the Dev environment. If you want o use another strategy, please see [https://argocd-image-updater.readthedocs.io/en/stable/basics/update-strategies/](https://argocd-image-updater.readthedocs.io/en/stable/basics/update-strategies/)
+
+ - `argocd-image-updater.argoproj.io/myapp.helm.image-tag`: Set the image tag Helm parameter that's defined in your Helm chart values file. For example, `image.tag`.
+
+ - `argocd-image-updater.argoproj.io/write-back-method`: Set the write-back method. It can be 'argocd' or 'git'. I've already mentioned about that and please see in the above section.
+   > To access the GitOps repository, you've already add the SSH private key when adding the Git repository to the Argo CD UI's repository settings in the previous **Argo CD** section. By default, the Argo CD Image Updater re-uses these credentials. So, you just need to set `git:repocreds` to authenticate to the Git repository. If you want to configure specific Git credentials, please see [https://argocd-image-updater.readthedocs.io/en/stable/basics/update-methods/#specifying-git-credentials](https://argocd-image-updater.readthedocs.io/en/stable/basics/update-methods/#specifying-git-credentials).
+
+Reference: [gitlab.com/thezawzaw/k8s-gitops-airnav-dev/-/blob/main/helm/podinfo-app/.argocd-source-podinfo-app-dev.yaml](gitlab.com/thezawzaw/k8s-gitops-airnav-dev/-/blob/main/helm/podinfo-app/.argocd-source-podinfo-app-dev.yaml)
+
+## Demo: Testing a Fully Automated CI/CD Pipeline
+
+Now, you can test now by making some UI changes in the source Podinfo application. 
+
+*For Example,*
+
+Go to the Podinfo Git repository, then update the vesion (from version 1 to version 2) to  in the `templates/demo.html`. Then, push the changes into `develop` branch of the Podinfo Git repository.
+
+```sh
+diff --git a/templates/demo.html b/templates/demo.html
+index 57589af..2de8134 100755
+--- a/templates/demo.html
++++ b/templates/demo.html
+@@ -37,7 +37,7 @@
+                     Welcome to Kubernetes GitOps CI/CD Demo
+                   </div>
+                   <div class="mt-3 mb-4 h5 font-weight-light text-gray-600">
+-                    GitOps in Kubernetes with GitLab CI and ArgoCD
++                    GitOps in Kubernetes with GitLab CI and ArgoCD (Version 2)
+                   </div>
+                 </div>
+               </div>
+```
+
+Then, wait for 2 to 3 minutes after GitLab CI jobs have passed. Then, you will see version change in the Podinfo application.
+
+![screenshot-podinfo-k8s-demo](./images/img_screenshot_podinfo_k8s_demo.jpeg)
 
